@@ -1,3 +1,6 @@
 rabbit-amazon-forwarder
 samples
 vendor/
+.env
+.idea
+mappings.json

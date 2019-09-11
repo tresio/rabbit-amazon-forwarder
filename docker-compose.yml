@@ -1,35 +1,14 @@
 version: '3.1'
 services:
   rabbitamazonforwarder:
-    image: airhelp/rabbit-amazon-forwarder
+    build:
+      context: .
+    volumes:
+      - ./config/mappings.json:/config/mappings.json
     ports:
       - "8080:8080"
-    volumes:
-      - "${MAPPING_FILE}:/config/mapping.json"
-      - "${CERTS_DIR:-./certs}:/certs"
     environment:
-      MAPPING_FILE: /config/mapping.json
+      MAPPING_FILE: /config/mappings.json
       AWS_REGION: ${AWS_REGION}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      CA_CERT_FILE: ${CA_CERT_FILE:- }
-      CERT_FILE: ${CERT_FILE:- }
-      KEY_FILE: ${KEY_FILE:- }
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile-test
-    command: go test ./...
-    depends_on:
-      - fmt
-      - vet
-  vet:
-    build:
-      context: .
-      dockerfile: Dockerfile-test
-    command: go vet -v ./...
-  fmt:
-    build:
-      context: .
-      dockerfile: Dockerfile-test
-    command: gofmt ./...

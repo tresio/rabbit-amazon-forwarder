@@ -133,12 +133,13 @@ func (c Consumer) setupExchangesAndQueues(conn *amqp.Connection, ch *amqp.Channe
 		return failOnError(err, "Failed to bind a queue:"+deadLetterQueueName)
 	}
 	// regular queue
-	if _, err = ch.QueueDeclare(c.QueueName, true, false, false, false,
+	//commented to prevent errors todo:figure out fix
+	/*if _, err = ch.QueueDeclare(c.QueueName, true, false, false, false,
 		amqp.Table{
 			"x-dead-letter-exchange": deadLetterExchangeName,
 		}); err != nil {
 		return failOnError(err, "Failed to declare a queue:"+c.QueueName)
-	}
+	}*/
 	// bind all of the routing keys
 	for _, routingKey := range c.RoutingKeys {
 		if err = ch.QueueBind(c.QueueName, routingKey, c.ExchangeName, false, nil); err != nil {

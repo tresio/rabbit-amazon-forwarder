@@ -1,5 +1,5 @@
 build:
-	docker build -t airhelp/rabbit-amazon-forwarder -f Dockerfile .
+	docker build -t tresio-go-forwarder -f Dockerfile .
 
 push: test build
 	docker push airhelp/rabbit-amazon-forwarder

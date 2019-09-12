@@ -22,4 +22,6 @@ RUN apk --update upgrade && \
     rm -rf /var/cache/apk/*
 
 COPY --from=golang-build /go/src/github.com/AirHelp/rabbit-amazon-forwarder/rabbit-amazon-forwarder /
+
+COPY ./config/mappings.json /config/mappings.json
 CMD ["/rabbit-amazon-forwarder"]

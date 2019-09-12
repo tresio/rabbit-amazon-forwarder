@@ -26,6 +26,10 @@ type response struct {
 	Message string `json:"message"`
 }
 
+type checkResponse struct {
+	Consumers []response `json:"consumers"`
+}
+
 type consumerChannel struct {
 	name  string
 	check chan bool
@@ -59,6 +63,9 @@ func (c *Client) Start() error {
 
 // Check checks running consumers
 func (c *Client) Check(w http.ResponseWriter, r *http.Request) {
+
+	var resp = new(checkResponse)
+
 	if accept := r.Header.Get(acceptHeader); accept != "" &&
 		!strings.Contains(accept, jsonType) &&
 		!strings.Contains(accept, acceptAll) {
@@ -66,24 +73,33 @@ func (c *Client) Check(w http.ResponseWriter, r *http.Request) {
 		notAcceptableResponse(w)
 		return
 	}
+
 	stopped := 0
+
 	for _, consumer := range c.consumers {
+		var r response
 		if len(consumer.check) > 0 {
 			stopped = stopped + 1
+			r = response{Healthy: false, Message: "Error with consumer"}
 			continue
 		}
 		consumer.check <- true
 		time.Sleep(500 * time.Millisecond)
 		if len(consumer.check) > 0 {
 			stopped = stopped + 1
+			r = response{Healthy: false, Message: "Error with consumer"}
+		} else {
+			r = response{Healthy: true, Message: "Consumer Name: " + consumer.name}
 		}
+		resp.Consumers = append(resp.Consumers, r)
 	}
 	if stopped > 0 {
 		message := fmt.Sprintf("Number of failed consumers: %d", stopped)
 		errorResponse(w, message)
 		return
 	}
-	successResponse(w)
+
+	checkSuccess(w, resp)
 }
 
 // Restart restarts every consumer
@@ -138,3 +154,16 @@ func successResponse(w http.ResponseWriter) {
 	}
 	w.Write(bytes)
 }
+
+func checkSuccess(w http.ResponseWriter, c *checkResponse) {
+	w.Header().Set(contentType, jsonType)
+	w.WriteHeader(200)
+	bytes, err := json.Marshal(c)
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(200)
+		return
+	}
+	w.Write(bytes)
+}
+

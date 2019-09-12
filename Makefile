@@ -7,5 +7,9 @@ push: test build
 test:
 	docker-compose run --rm tests
 
+up:
+	docker-compose build
+	docker-compose up
+
 dev:
 	go build

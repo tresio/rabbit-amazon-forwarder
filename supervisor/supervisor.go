@@ -88,9 +88,12 @@ func (c *Client) Check(w http.ResponseWriter, r *http.Request) {
 		if len(consumer.check) > 0 {
 			stopped = stopped + 1
 			r = response{Healthy: false, Message: "Error with consumer"}
-		} else {
+		}
+
+		if len(consumer.check) == 0 {
 			r = response{Healthy: true, Message: "Consumer Name: " + consumer.name}
 		}
+
 		resp.Consumers = append(resp.Consumers, r)
 	}
 	if stopped > 0 {
